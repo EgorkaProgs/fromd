@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Привет, {{ user.username }}!</h2>
+    
+    {% if user.is_banned %}
+        <div class="alert alert-danger">
+            Ваш аккаунт заблокирован. Обратитесь к администратору.
+        </div>
+    {% else %}
+        <div class="card">
+            <h3>Узнать время в игре</h3>
+            <form method="POST" action="{{ url_for('request_time') }}">
+                <div class="form-group">
+                    <label for="server">Сервер:</label>
+                    <select name="server" id="server" required>
+                        {% for server in servers %}
+                            <option value="{{ server }}">{{ server }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nickname">Никнейм:</label>
+                    <input type="text" name="nickname" id="nickname" placeholder="Black_Boss" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+                
+                <button type="submit" class="btn">Отправить запрос</button>
+            </form>
+        </div>
+        
+        <h3>Мои запросы</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Сервер</th>
+                    <th>Никнейм</th>
+                    <th>Статус</th>
+                    <th>Время</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                    <tr>
+                        <td>{{ req.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                        <td>{{ req.server }}</td>
+                        <td>{{ req.nickname }}</td>
+                        <td>
+                            {% if req.status == 'pending' %}
+                                <span class="status-pending">Ожидание</span>
+                            {% elif req.status == 'approved' %}
+                                <span class="status-approved">Подтверждено</span>
+                            {% else %}
+                                <span class="status-rejected">Отклонено</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if req.status == 'approved' %}
+                                {{ req.hours }} часов
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">Нет запросов</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    
+    <a href="{{ url_for('logout') }}" class="btn btn-logout">Выйти</a>
+</div>
+{% endblock %}
